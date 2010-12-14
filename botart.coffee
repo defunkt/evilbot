@@ -129,7 +129,21 @@ hear /about/, (message) ->
   message.say "I am learning to love."
 
 hear /help/, (message) ->
-  message.say "I listen for '@#{username} image me PHRASE' and '@#{username} wiki me PHRASE'"
+  message.say "I listen for '@#{username} image me PHRASE' and '@#{username} wiki me PHRASE' and '@#{username} weather in PLACE'"
+
+hear /weather in (.+)/i, (message) ->
+  place = message.match[1]
+  url   = "http://www.google.com/ig/api?weather=#{escape place}"
+
+  get url, (body) ->
+    try
+      console.log body
+      if match = body.match(/<current_conditions>(.+?)<\/current_conditions>/)
+        icon = match[1].match(/<icon data="(.+?)"/)
+        degrees = match[1].match(/<temp_f data="(\d+?)"/)
+        message.say "#{degrees[1]}° — http://www.google.com#{icon[1]}"
+    catch e
+      console.log "Weather error: " + e
 
 hear /wiki me (.*)/i, (message) ->
   term = escape(message.match[1])
