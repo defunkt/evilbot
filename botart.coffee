@@ -1,6 +1,9 @@
 #
 # Hello, and welcome to Botart.
 #
+# Some of this is stolen from Hubot.
+# Some of this is not.
+#
 
 
 #
@@ -71,16 +74,7 @@ request = (method, path, body, callback) ->
   request.write(body) if method is 'POST' and body
   request.end()
 
-post = (path, body, callback) ->
-  request('POST', path, body, callback)
-
-get = (path, body, callback) ->
-  request('GET', path, body, callback)
-
 handlers = []
-
-hear = (pattern, callback) ->
-  handlers.push [ pattern, callback ]
 
 dispatch = (message) ->
   for pair in handlers
@@ -116,6 +110,21 @@ heartbeat = ->
 heartbeat()
 
 get '/api/account/verify.json', listen
+
+
+#
+# robot actions
+#
+
+
+post = (path, body, callback) ->
+  request('POST', path, body, callback)
+
+get = (path, body, callback) ->
+  request('GET', path, body, callback)
+
+hear = (pattern, callback) ->
+  handlers.push [ pattern, callback ]
 
 
 #
