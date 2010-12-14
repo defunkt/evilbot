@@ -15,6 +15,7 @@ http   = require 'http'
 qs     = require 'querystring'
 env    = process.env
 
+
 #
 # robot brain
 #
@@ -55,7 +56,12 @@ request = (method, path, body, callback) ->
       response.on 'data', (chunk) ->
         data += chunk
       response.on 'end', ->
-        callback JSON.parse(data) if callback
+        if callback
+          try
+            body = JSON.parse(data)
+          catch e
+            body = data
+          callback body
     else
       console.log "#{response.statusCode}: #{path}"
       response.setEncoding('utf8')
