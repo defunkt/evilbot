@@ -26,7 +26,6 @@ env    = process.env
 ua       = 'botart 1.0'
 username = env.BOTART_USERNAME
 password = env.BOTART_PASSWORD
-auth     = 'Basic ' + new Buffer(username + ':' + password).toString('base64')
 
 request = (method, path, body, callback) ->
   if match = path.match(/^(https?):\/\/([^/]+?)(\/.+)/)
@@ -36,7 +35,7 @@ request = (method, path, body, callback) ->
     path = match[3]
   else
     headers =
-      Authorization  : auth
+      Authorization  : 'Basic '+new Buffer("#{username}:#{password}").toString('base64')
       Host           : 'convore.com'
       'Content-Type' : 'application/json'
       'User-Agent'   : ua
