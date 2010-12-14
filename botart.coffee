@@ -79,7 +79,7 @@ hear = (pattern, callback) ->
 dispatch = (message) ->
   for pair in handlers
     [ pattern, handler ] = pair
-    if match = message.message.match(pattern)
+    if message.user.username isnt username and match = message.message.match(pattern)
       message.match = match
       message.say = (thing) -> say(message.topic.id, thing)
       handler(message)
@@ -121,6 +121,9 @@ hear /feeling/, (message) ->
 
 hear /about/, (message) ->
   message.say "I am learning to love."
+
+hear /help/, (message) ->
+  message.say "I listen for '@#{username} image me PHRASE' and '@#{username} wiki me PHRASE'"
 
 hear /wiki me (.*)/i, (message) ->
   term = escape(message.match[1])
