@@ -37,10 +37,7 @@ dispatch = (message) ->
     if pattern.test(message.message) then handler(message)
 
 log = (data) ->
-  for message in data.messages
-    if message.kind is 'message'
-      dispatch(message) if /botart/.test(message.message)
-      console.log "#{message.topic.name} >> #{message.user.username}: #{message.message}"
+  console.log "#{message.topic.name} >> #{message.user.username}: #{message.message}"
 
 listen = ->
   request = client.request('GET', '/api/live.json', heads)
@@ -51,7 +48,10 @@ listen = ->
     response.on 'data', (chunk) ->
       data += chunk
     response.on 'end', ->
-      log JSON.parse(data)
+      for message in JSON.parse(data).messages
+        if message.kind is 'message'
+          dispatch(message) if /botart/.test(message.message)
+          log message
       listen()
 
 request = client.request('GET', '/api/account/verify.json', heads)
@@ -64,7 +64,6 @@ request.on 'response', (response) ->
     response.setEncoding('utf8')
     response.on 'data', (chunk) ->
       console.log chunk
-
 
 
 #
