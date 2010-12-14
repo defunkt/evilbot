@@ -12,6 +12,7 @@ path   = require 'path'
 print  = sys.print
 puts   = sys.puts
 http   = require 'http'
+qs     = require 'querystring'
 env    = process.env
 
 
@@ -22,53 +23,85 @@ env    = process.env
 username = env.BOTART_USERNAME
 password = env.BOTART_PASSWORD
 
-auth  = 'Basic ' + new Buffer(username + ':' + password).toString('base64')
-heads = {'host': 'convore.com', 'Authorization': auth}
+client  = http.createClient(443, 'convore.com', true)
+auth    = 'Basic ' + new Buffer(username + ':' + password).toString('base64')
+request = (method, path, body, callback) ->
+  headers =
+    Authorization  : auth
+    Host           : 'convore.com'
+    'Content-Type' : 'application/json'
 
-client = http.createClient(443, 'convore.com', true)
+  if typeof(body) is 'function' and not callback
+    callback = body
+    body = null
 
-handlers = {}
+  if method is 'POST' and body
+    body = JSON.stringify(body) if typeof(body) isnt 'string'
+    headers['Content-Length'] = body.length
+
+  request = client.request(method, path, headers)
+
+  request.on 'response', (response) ->
+    if response.statusCode is 200
+      data = ''
+      response.setEncoding('utf8')
+      response.on 'data', (chunk) ->
+        data += chunk
+      response.on 'end', ->
+        callback(data)
+    else
+      console.log "#{response.statusCode}: #{path}"
+      response.setEncoding('utf8')
+      response.on 'data', (chunk) ->
+        console.log chunk
+
+  request.write(body) if method is 'POST' and body
+  request.end()
+
+post = (path, body, callback) ->
+  request('POST', path, body, callback)
+
+get = (path, body, callback) ->
+  request('GET', path, body, callback)
+
+handlers = []
 
 hear = (pattern, callback) ->
-  handlers[pattern] = callback
+  handlers.push [ pattern, callback ]
 
 dispatch = (message) ->
-  for pattern, handler of handlers
+  for pair in handlers
+    [ pattern, handler ] = pair
     if pattern.test(message.message) then handler(message)
 
-log = (data) ->
+log = (message) ->
   console.log "#{message.topic.name} >> #{message.user.username}: #{message.message}"
 
-listen = ->
-  request = client.request('GET', '/api/live.json', heads)
-  request.end()
-  request.on 'response', (response) ->
-    data = ''
-    response.setEncoding('utf8')
-    response.on 'data', (chunk) ->
-      data += chunk
-    response.on 'end', ->
-      for message in JSON.parse(data).messages
-        if message.kind is 'message'
-          dispatch(message) if /botart/.test(message.message)
-          log message
-      listen()
+say = (topic, message) ->
+  data = qs.stringify { message: message }
+  post "/api/topics/#{topic}/messages/create.json", data, (body) ->
+    log JSON.stringify(body)
 
-request = client.request('GET', '/api/account/verify.json', heads)
-request.end()
-request.on 'response', (response) ->
-  if response.statusCode is 200
+listen = ->
+  get '/api/live.json', (body) ->
+    for message in JSON.parse(body).messages
+      if message.kind is 'message'
+        dispatch(message) if /botart/.test(message.message)
+        log message
     listen()
-  else
-    console.log response.statusCode
-    response.setEncoding('utf8')
-    response.on 'data', (chunk) ->
-      console.log chunk
+
+
+#
+# robot heart
+#
+
+get '/api/account/verify.json', ->
+  say 850, "Yes..."
 
 
 #
 # robot personality
 #
 
-hear /sup/, ->
-  puts("yo!")
+hear /feeling/, (message) ->
+  say(message.topic.id, "i can... speak")
