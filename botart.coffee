@@ -94,7 +94,7 @@ listen = ->
   get '/api/live.json', (body) ->
     for message in body.messages
       if message.kind is 'message'
-        dispatch(message) if /botart/.test(message.message)
+        dispatch(message) if message.message.match(new RegExp(username))
         log message
     listen()
 
@@ -136,8 +136,8 @@ hear /wiki me (.*)/i, (message) ->
       console.log "Wiki error: " + e
 
 hear /image me (.*)/i, (message) ->
-  phrase = message.match[1]
-  url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&rsz=8&q=#{escape(phrase)}"
+  phrase = escape(message.match[1])
+  url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&rsz=8&q=#{phrase}"
 
   get url, (body) ->
     try
