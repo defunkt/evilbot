@@ -23,13 +23,19 @@ env    = process.env
 username = env.BOTART_USERNAME
 password = env.BOTART_PASSWORD
 
-client  = http.createClient(443, 'convore.com', true)
 auth    = 'Basic ' + new Buffer(username + ':' + password).toString('base64')
 request = (method, path, body, callback) ->
-  headers =
-    Authorization  : auth
-    Host           : 'convore.com'
-    'Content-Type' : 'application/json'
+  if match = path.match(/^(https?):\/\/([^/]+?)(\/.+)/)
+    headers = { Host: match[2],  'Content-Type': 'application/json' }
+    port = if match[1] == 'https' then 443 else 80
+    client = http.createClient(port, match[2], port == 443)
+    path = match[3]
+  else
+    headers =
+      Authorization  : auth
+      Host           : 'convore.com'
+      'Content-Type' : 'application/json'
+    client = http.createClient(443, 'convore.com', true)
 
   if typeof(body) is 'function' and not callback
     callback = body
@@ -72,10 +78,15 @@ hear = (pattern, callback) ->
 dispatch = (message) ->
   for pair in handlers
     [ pattern, handler ] = pair
-    if pattern.test(message.message) then handler(message)
+    if match = message.message.match(pattern)
+      message.match = match
+      handler(message)
 
 log = (message) ->
-  console.log "#{message.topic.name} >> #{message.user.username}: #{message.message}"
+  if message.topic
+    console.log "#{message.topic.name} >> #{message.user.username}: #{message.message}"
+  else
+    console.log "botart >> #{message.user.username}: #{message.message}"
 
 say = (topic, message) ->
   data = qs.stringify { message: message }
@@ -96,7 +107,7 @@ listen = ->
 #
 
 heartbeat = ->
-  get 'https://convore.com/api/presence.json', ->
+  get '/api/presence.json', ->
     setTimeout heartbeat, 1000 * 58
 heartbeat()
 
@@ -108,4 +119,15 @@ get '/api/account/verify.json', listen
 #
 
 hear /feeling/, (message) ->
-  say(message.topic.id, "i can... speak")
+  say(message.topic.id, "i feel... alive")
+
+hear /image me (.*)/i, (message) ->
+  imagery = message.match[1]
+
+  get 'http://ajax.googleapis.com/ajax/services/search/images?v=1.0&rsz=8&q='+escape(imagery), (body) ->
+    try
+      images = body.responseData.results
+      image  = images[ Math.floor(Math.random()*images.length) ]
+      say(message.topic.id, image.unescapedUrl)
+    catch e
+      console.log "Image error: " + e
