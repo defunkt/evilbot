@@ -99,6 +99,20 @@ listen = ->
 
 
 #
+# robot actions
+#
+
+post = (path, body, callback) ->
+  request('POST', path, body, callback)
+
+get = (path, body, callback) ->
+  request('GET', path, body, callback)
+
+hear = (pattern, callback) ->
+  handlers.push [ pattern, callback ]
+
+
+#
 # robot heart
 #
 
@@ -109,21 +123,6 @@ heartbeat = ->
 heartbeat()
 
 get '/api/account/verify.json', listen
-
-
-#
-# robot actions
-#
-
-
-post = (path, body, callback) ->
-  request('POST', path, body, callback)
-
-get = (path, body, callback) ->
-  request('GET', path, body, callback)
-
-hear = (pattern, callback) ->
-  handlers.push [ pattern, callback ]
 
 
 #
