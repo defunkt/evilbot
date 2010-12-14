@@ -54,7 +54,7 @@ request = (method, path, body, callback) ->
       response.on 'data', (chunk) ->
         data += chunk
       response.on 'end', ->
-        callback JSON.parse(data)
+        callback JSON.parse(data) if callback
     else
       console.log "#{response.statusCode}: #{path}"
       response.setEncoding('utf8')
@@ -83,15 +83,10 @@ dispatch = (message) ->
       handler(message)
 
 log = (message) ->
-  if message.topic
-    console.log "#{message.topic.name} >> #{message.user.username}: #{message.message}"
-  else
-    console.log "botart >> #{message.user.username}: #{message.message}"
+  console.log "#{message.topic.name} >> #{message.user.username}: #{message.message}"
 
 say = (topic, message) ->
-  data = qs.stringify { message: message }
-  post "/api/topics/#{topic}/messages/create.json", data, (body) ->
-    log body.message
+  post "/api/topics/#{topic}/messages/create.json", qs.stringify(message: message)
 
 listen = ->
   get '/api/live.json', (body) ->
