@@ -48,7 +48,7 @@ request = (method, path, body, callback) ->
       response.on 'data', (chunk) ->
         data += chunk
       response.on 'end', ->
-        callback(data)
+        callback JSON.parse(data)
     else
       console.log "#{response.statusCode}: #{path}"
       response.setEncoding('utf8')
@@ -80,11 +80,11 @@ log = (message) ->
 say = (topic, message) ->
   data = qs.stringify { message: message }
   post "/api/topics/#{topic}/messages/create.json", data, (body) ->
-    log JSON.stringify(body)
+    log body.message
 
 listen = ->
   get '/api/live.json', (body) ->
-    for message in JSON.parse(body).messages
+    for message in body.messages
       if message.kind is 'message'
         dispatch(message) if /botart/.test(message.message)
         log message
@@ -95,8 +95,12 @@ listen = ->
 # robot heart
 #
 
-get '/api/account/verify.json', ->
-  say 850, "Yes..."
+heartbeat = ->
+  get 'https://convore.com/api/presence.json', ->
+    setTimeout heartbeat, 1000 * 58
+heartbeat()
+
+get '/api/account/verify.json', listen
 
 
 #
