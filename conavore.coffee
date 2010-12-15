@@ -167,7 +167,7 @@ hear /wiki me (.*)/i, (message) ->
 
 hear /image me (.*)/i, (message) ->
   phrase = escape(message.match[1])
-  url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&rsz=8&q=#{phrase}"
+  url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&rsz=8&safe=active&q=#{phrase}"
 
   get url, (body) ->
     try
