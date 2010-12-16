@@ -1,5 +1,5 @@
 #
-# Hello, and welcome to Conavore.
+# Hello, and welcome to Evilbot.
 #
 # Some of this is stolen from Hubot.
 # Some of this is not.
@@ -23,9 +23,9 @@ env    = process.env
 # robot brain
 #
 
-ua       = 'conavore 1.0'
-username = env.CONAVORE_USERNAME
-password = env.CONAVORE_PASSWORD
+ua       = 'evilbot 1.0'
+username = env.EVILBOT_USERNAME
+password = env.EVILBOT_PASSWORD
 
 request = (method, path, body, callback) ->
   if match = path.match(/^(https?):\/\/([^/]+?)(\/.+)/)
