@@ -49,9 +49,9 @@ request = (method, path, body, callback) ->
     body = JSON.stringify(body) if typeof(body) isnt 'string'
     headers['Content-Length'] = body.length
 
-  request = client.request(method, path, headers)
+  req = client.request(method, path, headers)
 
-  request.on 'response', (response) ->
+  req.on 'response', (response) ->
     if response.statusCode is 200
       data = ''
       response.setEncoding('utf8')
@@ -64,14 +64,16 @@ request = (method, path, body, callback) ->
           catch e
             body = data
           callback body
+    else if response.statusCode is 302
+      request(method, path, body, callback)
     else
       console.log "#{response.statusCode}: #{path}"
       response.setEncoding('utf8')
       response.on 'data', (chunk) ->
         console.log chunk
 
-  request.write(body) if method is 'POST' and body
-  request.end()
+  req.write(body) if method is 'POST' and body
+  req.end()
 
 handlers = []
 
