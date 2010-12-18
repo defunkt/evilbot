@@ -82,14 +82,14 @@ dispatch = (message) ->
     [ pattern, handler ] = pair
     if message.user.username isnt username and match = message.message.match(pattern)
       message.match = match
-      message.say = (thing) -> say(message.topic.id, thing)
+      message.say = (thing, callback) -> say(message.topic.id, thing, callback)
       handler(message)
 
 log = (message) ->
   console.log "#{message.topic.name} >> #{message.user.username}: #{message.message}"
 
-say = (topic, message) ->
-  post "/api/topics/#{topic}/messages/create.json", qs.stringify(message: message)
+say = (topic, message, callback) ->
+  post "/api/topics/#{topic}/messages/create.json", qs.stringify(message: message), callback
 
 listen = ->
   get '/api/live.json', (body) ->
