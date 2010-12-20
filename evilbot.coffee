@@ -113,6 +113,10 @@ get = (path, body, callback) ->
 hear = (pattern, callback) ->
   handlers.push [ pattern, callback ]
 
+descriptions = {}
+desc = (phrase, functionality) ->
+  descriptions[phrase] = functionality
+
 
 #
 # robot heart
@@ -138,8 +142,16 @@ hear /about/, (message) ->
   message.say "I am learning to love."
 
 hear /help/, (message) ->
-  message.say "I listen for '@#{username} image me PHRASE' and '@#{username} wiki me PHRASE' and '@#{username} weather in PLACE'"
+  message.say "I listen for the following…", ->
+    for phrase, functionality of descriptions
+      console.log(typeof(functionality))
+      if functionality
+        output =  phrase + ": " + functionality
+      else
+        output = phrase
+      message.say output
 
+desc 'weather in PLACE'
 hear /weather in (.+)/i, (message) ->
   place = message.match[1]
   url   = "http://www.google.com/ig/api?weather=#{escape place}"
@@ -154,6 +166,7 @@ hear /weather in (.+)/i, (message) ->
     catch e
       console.log "Weather error: " + e
 
+desc 'wiki me PHRASE', 'returns a wikipedia page for PHRASE'
 hear /wiki me (.*)/i, (message) ->
   term = escape(message.match[1])
   url  = "http://en.wikipedia.org/w/api.php?action=opensearch&search=#{term}&format=json"
@@ -167,6 +180,7 @@ hear /wiki me (.*)/i, (message) ->
     catch e
       console.log "Wiki error: " + e
 
+desc 'image me PHRASE'
 hear /image me (.*)/i, (message) ->
   phrase = escape(message.match[1])
   url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&rsz=8&safe=active&q=#{phrase}"
