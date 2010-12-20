@@ -144,7 +144,6 @@ hear /about/, (message) ->
 hear /help/, (message) ->
   message.say "I listen for the following…", ->
     for phrase, functionality of descriptions
-      console.log(typeof(functionality))
       if functionality
         output =  phrase + ": " + functionality
       else
