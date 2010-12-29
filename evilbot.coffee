@@ -122,12 +122,6 @@ desc = (phrase, functionality) ->
 # robot heart
 #
 
-heartbeat = ->
-  get '/api/presence.json', ->
-    console.log 'beat beat...'
-    setTimeout heartbeat, 30000
-heartbeat()
-
 get '/api/account/verify.json', listen
 
 
