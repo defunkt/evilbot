@@ -28,7 +28,7 @@ username = env.EVILBOT_USERNAME
 password = env.EVILBOT_PASSWORD
 
 request = (method, path, body, callback) ->
-  if match = path.match(/^(https?):\/\/([^/]+?)(\/.+)/)
+  if match = path.match(/^(https?):\/\/([^\/]+?)(\/.+)/)
     headers = { Host: match[2],  'Content-Type': 'application/json', 'User-Agent': ua }
     port = if match[1] == 'https' then 443 else 80
     client = http.createClient(port, match[2], port == 443)
