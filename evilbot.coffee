@@ -71,6 +71,7 @@ request = (method, path, body, callback) ->
       response.setEncoding('utf8')
       response.on 'data', (chunk) ->
         console.log chunk
+      process.exit(1)
 
   req.write(body) if method is 'POST' and body
   req.end()
