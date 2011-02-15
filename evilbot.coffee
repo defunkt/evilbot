@@ -145,6 +145,13 @@ hear /help/, (message) ->
         output = phrase
       message.say output
 
+desc 'commit'
+hear /commit/, (message) ->
+  url = "http://whatthecommit.com/index.txt"
+  
+  get url, (body) ->
+    message.say body
+  
 desc 'weather in PLACE'
 hear /weather in (.+)/i, (message) ->
   place = message.match[1]
