@@ -145,6 +145,29 @@ hear /help/, (message) ->
         output = phrase
       message.say output
 
+desc 'adventure me'
+hear /adventure me/, (message) ->
+  txts = [
+    "You are in a maze of twisty passages, all alike.",
+    "It is pitch black. You are likely to be eaten by a grue.",
+    "XYZZY",
+    "You eat the sandwich.",
+    "In this feat of unaccustomed daring, you manage to land on your feet without killing yourself.",
+    "Suicide is not the answer.",
+    "This space intentionally left blank.",
+    "I assume you wish to stab yourself with your pinky then?",
+    "Talking to yourself is a sign of impending mental collapse.",
+    "Clearly you are a suicidal maniac. We don't allow psychotics in the cave, since they may harm other adventurers.",
+    "Auto-cannibalism is not the answer.",
+    "Look at self: \"You would need prehensile eyeballs to do that.\"",
+    "The lamp is somewhat dimmer. The lamp is definitely dimmer. The lamp is nearly out. I hope you have more light than the lamp.",
+    "What a (ahem!) strange idea!",
+    "Want some Rye? Course ya do!"
+  ]
+  txt = txts[ Math.floor(Math.random()*txts.length) ]
+  
+  message.say txt
+
 desc 'weather in PLACE'
 hear /weather in (.+)/i, (message) ->
   place = message.match[1]
