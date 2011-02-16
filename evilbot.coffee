@@ -17,6 +17,7 @@ puts   = sys.puts
 http   = require 'http'
 qs     = require 'querystring'
 env    = process.env
+exec   = require('child_process').exec
 
 
 #
@@ -135,6 +136,11 @@ hear /feeling/, (message) ->
 
 hear /about/, (message) ->
   message.say "I am learning to love."
+
+hear /reload/, (message) ->
+  message.say "Reloading…"
+  exec "git fetch origin && git reset --hard origin/master", ->
+    process.exit(1)
 
 hear /help/, (message) ->
   message.say "I listen for the following…", ->
