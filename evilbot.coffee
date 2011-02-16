@@ -165,8 +165,15 @@ hear /adventure me/, (message) ->
     "Want some Rye? Course ya do!"
   ]
   txt = txts[ Math.floor(Math.random()*txts.length) ]
-  
+
   message.say txt
+
+desc 'commit'
+hear /commit/, (message) ->
+  url = "http://whatthecommit.com/index.txt"
+
+  get url, (body) ->
+    message.say body
 
 desc 'weather in PLACE'
 hear /weather in (.+)/i, (message) ->
