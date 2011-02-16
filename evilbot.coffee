@@ -175,6 +175,13 @@ hear /commit/, (message) ->
   get url, (body) ->
     message.say body
 
+desc 'fortune'
+hear /fortune/, (message) ->
+  url = "http://www.fortunefortoday.com/getfortuneonly.php"
+
+  get url, (body) ->
+    message.say body
+
 desc 'weather in PLACE'
 hear /weather in (.+)/i, (message) ->
   place = message.match[1]
