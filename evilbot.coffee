@@ -137,6 +137,9 @@ hear /feeling/, (message) ->
 hear /about/, (message) ->
   message.say "I am learning to love."
 
+hear /ping/, (message) ->
+  message.say "PONG"
+
 hear /reload/, (message) ->
   message.say "Reloading…"
   exec "git fetch origin && git reset --hard origin/master", ->
