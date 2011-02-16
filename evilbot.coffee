@@ -141,9 +141,9 @@ hear /ping/, (message) ->
   message.say "PONG"
 
 hear /reload/, (message) ->
-  message.say "Reloading…"
-  exec "git fetch origin && git reset --hard origin/master", ->
-    process.exit(1)
+  message.say "Reloading…", ->
+    exec "git fetch origin && git reset --hard origin/master", ->
+      process.exit(1)
 
 hear /help/, (message) ->
   message.say "I listen for the following…", ->
