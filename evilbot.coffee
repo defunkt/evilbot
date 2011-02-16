@@ -95,7 +95,9 @@ say = (topic, message, callback) ->
 
 listen = (cursor) ->
   url = '/api/live.json'
-  url = "#{url}?cursor=#{cursor}" if cursor
+
+  if cursor and cursor.constructor == String
+    url += "?cursor=#{cursor}"
 
   get url, (body) ->
     for message in body.messages
