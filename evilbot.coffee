@@ -93,13 +93,20 @@ log = (message) ->
 say = (topic, message, callback) ->
   post "/api/topics/#{topic}/messages/create.json", qs.stringify(message: message), callback
 
-listen = ->
-  get '/api/live.json', (body) ->
+listen = (cursor) ->
+  url = '/api/live.json'
+  url = "#{url}?cursor=#{cursor}" if cursor
+
+  get url, (body) ->
     for message in body.messages
       if message.kind is 'message'
         dispatch(message) if message.message.match(new RegExp(username))
         log message
-    listen()
+
+    if message and message._id
+      listen(message._id)
+    else
+      listen()
 
 
 #
