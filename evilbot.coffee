@@ -15,6 +15,7 @@ path   = require 'path'
 print  = sys.print
 puts   = sys.puts
 http   = require 'http'
+https  = require 'https'
 qs     = require 'querystring'
 env    = process.env
 exec   = require('child_process').exec
@@ -30,17 +31,26 @@ password = env.EVILBOT_PASSWORD
 
 request = (method, path, body, callback) ->
   if match = path.match(/^(https?):\/\/([^\/]+?)(\/.+)/)
-    headers = { Host: match[2],  'Content-Type': 'application/json', 'User-Agent': ua }
     port = if match[1] == 'https' then 443 else 80
-    client = http.createClient(port, match[2], port == 443)
+    host = match[2]
     path = match[3]
-  else
     headers =
-      Authorization  : 'Basic '+new Buffer("#{username}:#{password}").toString('base64')
-      Host           : 'convore.com'
       'Content-Type' : 'application/json'
       'User-Agent'   : ua
-    client = http.createClient(443, 'convore.com', true)
+  else
+    host = 'convore.com'
+    port = 443
+    headers =
+      Authorization  : 'Basic '+new Buffer("#{username}:#{password}").toString('base64')
+      'Content-Type' : 'application/json'
+      'User-Agent'   : ua
+
+  options =
+    method         : method
+    port           : port
+    host           : host
+    path           : path
+    headers        : headers
 
   if typeof(body) is 'function' and not callback
     callback = body
@@ -48,11 +58,9 @@ request = (method, path, body, callback) ->
 
   if method is 'POST' and body
     body = JSON.stringify(body) if typeof(body) isnt 'string'
-    headers['Content-Length'] = body.length
+    options.headers['Content-Length'] = body.length
 
-  req = client.request(method, path, headers)
-
-  req.on 'response', (response) ->
+  req = (if options.port == 443 then https else http).request options, (response) ->
     if response.statusCode is 200
       data = ''
       response.setEncoding('utf8')
