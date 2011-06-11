@@ -15,6 +15,7 @@ path   = require 'path'
 print  = sys.print
 puts   = sys.puts
 http   = require 'http'
+https  = require 'https'
 qs     = require 'querystring'
 env    = process.env
 exec   = require('child_process').exec
@@ -24,9 +25,10 @@ exec   = require('child_process').exec
 # robot brain
 #
 
-ua       = 'evilbot 1.0'
-username = env.EVILBOT_USERNAME
-password = env.EVILBOT_PASSWORD
+ua          = 'evilbot 1.0'
+username    = env.EVILBOT_USERNAME
+password    = env.EVILBOT_PASSWORD
+youtube_key = env.YOUTUBE_KEY
 
 request = (method, path, body, callback) ->
   if match = path.match(/^(https?):\/\/([^\/]+?)(\/.+)/)
@@ -40,6 +42,12 @@ request = (method, path, body, callback) ->
       Host           : 'convore.com'
       'Content-Type' : 'application/json'
       'User-Agent'   : ua
+    options =
+      host    :  'convore.com'
+      port    :  443
+      path    :  path
+      method  :  method
+      headers :  headers
     client = http.createClient(443, 'convore.com', true)
 
   if typeof(body) is 'function' and not callback
@@ -50,7 +58,10 @@ request = (method, path, body, callback) ->
     body = JSON.stringify(body) if typeof(body) isnt 'string'
     headers['Content-Length'] = body.length
 
-  req = client.request(method, path, headers)
+  if options
+    req = https.request(options)
+  else
+    req = client.request(method, path, headers)
 
   req.on 'response', (response) ->
     if response.statusCode is 200
@@ -241,6 +252,25 @@ hear /image me (.*)/i, (message) ->
       message.say image.unescapedUrl
     catch e
       console.log "Image error: " + e
+
+if youtube_key
+  desc 'video me PHRASE'
+  hear /video me (.*)/i, (message) ->
+    phrase = escape(message.match[1])
+    url = "http://gdata.youtube.com/feeds/api/videos?q=#{phrase}&key=#{youtube_key}&v=2&orderby=rating&safeSearch=none&alt=json&max-results=10&prettyprint=true"
+
+    get url, (body) ->
+      try
+        videos = body.feed.entry
+        video  = videos[ Math.floor(Math.random()*videos.length) ]
+
+        title = video.title["$t"]
+        thumb = video['media$group']['media$thumbnail'][1]
+
+        message.say title + " " + thumb["url"]
+        message.say video.content["src"]
+      catch e
+        console.log "Video error: " + e
 
 hear /(the rules|the laws)/i, (message) ->
   message.say "1. A robot may not injure a human being or, through inaction, allow a human being to come to harm.", ->
